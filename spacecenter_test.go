@@ -1,19 +1,12 @@
 package krpc_test
 
-import (
-	"fmt"
-	"testing"
+// var scc, _ = sturdyengine.NewDefaultConnection()
+// var sc, e = sturdyengine.NewSpaceCenter(&scc)
 
-	sturdyengine "github.com/ddouglas/go-krpc"
-)
-
-var scc, _ = sturdyengine.NewDefaultConnection()
-var sc, e = sturdyengine.NewSpaceCenter(&scc)
-
-func TestInitSpaceCenter(t *testing.T) {
-	sc, e = sturdyengine.NewSpaceCenter(&scc)
-	if e != nil {
-		fmt.Println(e)
-		t.FailNow()
-	}
-}
+// func TestInitSpaceCenter(t *testing.T) {
+// 	sc, e = sturdyengine.NewSpaceCenter(&scc)
+// 	if e != nil {
+// 		fmt.Println(e)
+// 		t.FailNow()
+// 	}
+// }

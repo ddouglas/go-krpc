@@ -1,6 +1,8 @@
 package krpc
 
 import (
+	"fmt"
+
 	util "github.com/ddouglas/go-krpc/internal"
 	"github.com/ddouglas/go-krpc/internal/pb"
 	"google.golang.org/protobuf/proto"
@@ -15,14 +17,21 @@ type Vessel struct {
 }
 
 // NewVessel returns a initialized instance of a vessel ready to use
-func (sc *SpaceCenter) NewVessel() (vessel Vessel, err error) {
+func (sc *SpaceCenter) NewVessel() (*Vessel, error) {
 	vsl, err := sc.GetActiveVessel()
-	vessel = Vessel{
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch active vessel: %w", err)
+	}
+	vessel := &Vessel{
 		sc:     sc,
 		vessel: vsl,
 	}
 	vessel.control, err = vessel.GetVesselControl()
-	return
+	if err != nil {
+		fmt.Printf("[WARN] failed to fetch vessel control: %s\n", err)
+	}
+
+	return vessel, err
 }
 
 // ActivateNextStage activate the next stage of the given control unit

@@ -1,8 +1,7 @@
 package krpc
 
 import (
-	"errors"
-	"flag"
+	"fmt"
 	"net/url"
 
 	"github.com/ddouglas/go-krpc/internal/pb"
@@ -19,7 +18,7 @@ type Connection struct {
 }
 
 // NewConnection sets informations required by the connection and also creates said. If the connection cannot be established returns error and struct member Conn is unset
-func NewConnection(clientName string, port string) (conn Connection, e error) {
+func NewConnection(clientName string, addr, port string) (conn Connection, e error) {
 	conn = Connection{}
 	conn.Upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
@@ -29,10 +28,9 @@ func NewConnection(clientName string, port string) (conn Connection, e error) {
 	q := url.Values{}
 	q.Add("name", clientName)
 
-	f := flag.NewFlagSet(clientName, flag.ExitOnError)
-
 	conn.URI = url.URL{
-		Scheme: "ws", Host: *f.String("addr", "localhost:"+port, "kRPC client"),
+		Scheme:   "ws",
+		Host:     fmt.Sprintf("%s:%s", addr, port),
 		RawQuery: q.Encode(),
 	}
 
@@ -41,64 +39,67 @@ func NewConnection(clientName string, port string) (conn Connection, e error) {
 }
 
 // NewDefaultConnection simply calls InitializeAPI with the default port of the krpc mod
-func NewDefaultConnection() (conn Connection, e error) {
-	conn, e = NewConnection("sturdyengine", "50000")
-	return
-}
+// func NewDefaultConnection() (conn Connection, e error) {
+// 	conn, e = NewConnection("go-krpc", "50000")
+// 	return
+// }
 
 // Close closes the current connection
-func (conn *Connection) Close() (e error) {
+func (conn *Connection) Close() error {
 	if conn.Conn == nil {
-		e = errors.New("Connection is nil")
-		return
+		return fmt.Errorf("Connection is nil")
 	}
-	e = conn.Conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
-	if e != nil {
-		return
+	err := conn.Conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+	if err != nil {
+		return fmt.Errorf("failed to write connection message: %w", err)
 	}
 
-	return
+	return nil
 }
 
-func (conn *Connection) sendMessage(r *pb.Request) (p []byte, e error) {
-	req, e := proto.Marshal(r)
-	if e != nil {
-		return
+func (conn *Connection) sendMessage(r *pb.Request) ([]byte, error) {
+	req, err := proto.Marshal(r)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 	if conn.Conn == nil {
-		e = errors.New("Connection is nil, check if any server is running on given port")
-		return
+		return nil, fmt.Errorf("Connection is nil, check if any server is running on given port")
 	}
 
-	conn.Conn.WriteMessage(websocket.BinaryMessage, req)
-	_, p, e = conn.Conn.ReadMessage()
-	if e != nil {
-		return
+	err = conn.Conn.WriteMessage(websocket.BinaryMessage, req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to write message to socket: %w", err)
+	}
+	_, msg, err := conn.Conn.ReadMessage()
+	if err != nil {
+		return nil, fmt.Errorf("failed to write message: %w", err)
 	}
 
-	return
+	return msg, nil
 }
 
 // REQUEST AND ARGMUENT CREATION
 
-func createRequest(service string, procedure string, arguments []*pb.Argument) (pr *pb.Request) {
+func createRequest(service string, procedure string, arguments []*pb.Argument) *pb.Request {
 	pc := &pb.ProcedureCall{
 		Service:   service,
 		Procedure: procedure,
 		Arguments: arguments,
 	}
-	pr = &pb.Request{
+	return &pb.Request{
 		Calls: []*pb.ProcedureCall{pc},
 	}
-	return
+
 }
 
-func createArguments(args [][]byte) (arg []*pb.Argument) {
-	for pos, val := range args {
-		arg = append(arg, &pb.Argument{
+func createArguments(argsIn [][]byte) []*pb.Argument {
+
+	var args = make([]*pb.Argument, 0, len(argsIn))
+	for pos, val := range argsIn {
+		args = append(args, &pb.Argument{
 			Position: uint32(pos),
 			Value:    val,
 		})
 	}
-	return
+	return args
 }
