@@ -1,10 +1,10 @@
-package sturdyengine_test
+package krpc_test
 
 import (
 	"fmt"
 	"testing"
 
-	"github.com/jwuensche/sturdyengine"
+	sturdyengine "github.com/ddouglas/go-krpc"
 )
 
 var scc, _ = sturdyengine.NewDefaultConnection()

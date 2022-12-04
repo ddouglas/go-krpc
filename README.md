@@ -1,16 +1,18 @@
-# sturdyengine
+# go-krpc
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/jwuensche/sturdyengine)](https://goreportcard.com/report/github.com/jwuensche/sturdyengine)
-[![Go Doc](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat-square)](http://godoc.org/github.com/jwuensche/sturdyengine)
+[![Go Report Card](https://goreportcard.com/badge/github.com/ddouglas/go-krpc)](https://goreportcard.com/report/github.com/ddouglas/go-krpc)
+[![Go Doc](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat-square)](http://godoc.org/github.com/ddouglas/go-krpc)
 
-Sturdy by name, fragile by nature.
+Golang Client for the kRPC API for Kerbal Space Program
 
-Go implementation of kRPC API for Kerbal Space Program
+## Requirements
+
+1. Have the kRPC Mod installed in Kerbal Space Program
 
 ## How to install
 
 ```bash
-$ go get github.com/jwuensche/sturdyengine
+$ go get github.com/ddouglas/go-krpc
 ```
 
 ![preview](https://raw.githubusercontent.com/ashleymcnamara/gophers/master/GOPHERCON.png)

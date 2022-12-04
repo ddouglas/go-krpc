@@ -1,12 +1,12 @@
-package sturdyengine
+package krpc
 
 import (
-	"github.com/golang/protobuf/proto"
-	util "github.com/jwuensche/sturdyengine/internal"
-	krpc "github.com/jwuensche/sturdyengine/internal/krpcproto"
+	util "github.com/ddouglas/go-krpc/internal"
+	"github.com/ddouglas/go-krpc/internal/pb"
+	"google.golang.org/protobuf/proto"
 )
 
-//Vessel represents a combination of krpc Vessel & Control allowing direct operations on the current vessel
+// Vessel represents a combination of krpc Vessel & Control allowing direct operations on the current vessel
 type Vessel struct {
 	sc *SpaceCenter
 
@@ -14,7 +14,7 @@ type Vessel struct {
 	control []byte
 }
 
-//NewVessel returns a initialized instance of a vessel ready to use
+// NewVessel returns a initialized instance of a vessel ready to use
 func (sc *SpaceCenter) NewVessel() (vessel Vessel, err error) {
 	vsl, err := sc.GetActiveVessel()
 	vessel = Vessel{
@@ -25,7 +25,7 @@ func (sc *SpaceCenter) NewVessel() (vessel Vessel, err error) {
 	return
 }
 
-//ActivateNextStage activate the next stage of the given control unit
+// ActivateNextStage activate the next stage of the given control unit
 func (vsl *Vessel) ActivateNextStage() (err error) {
 	arg := [][]byte{vsl.control}
 	pr := createRequest("SpaceCenter", "Control_ActivateNextStage", createArguments(arg))
@@ -34,24 +34,24 @@ func (vsl *Vessel) ActivateNextStage() (err error) {
 	if err != nil {
 		return
 	}
-	res := &krpc.Response{}
+	res := &pb.Response{}
 	proto.Unmarshal(p, res)
 
 	return
 }
 
-//GetActiveVessel returns the current active Vessel as byte slice
+// GetActiveVessel returns the current active Vessel as byte slice
 func (sc *SpaceCenter) GetActiveVessel() (r []byte, e error) {
 	pr := createRequest("SpaceCenter", "get_ActiveVessel", nil)
 
 	p, e := sc.conn.sendMessage(pr)
-	res := &krpc.Response{}
+	res := &pb.Response{}
 	proto.Unmarshal(p, res)
 	r = res.GetResults()[0].GetValue()
 	return
 }
 
-//GetVesselControl returns control object to a given vessel
+// GetVesselControl returns control object to a given vessel
 func (vsl *Vessel) GetVesselControl() (r []byte, e error) {
 	arg := [][]byte{vsl.vessel}
 	pr := createRequest("SpaceCenter", "Vessel_get_Control", createArguments(arg))
@@ -60,7 +60,7 @@ func (vsl *Vessel) GetVesselControl() (r []byte, e error) {
 	if e != nil {
 		return
 	}
-	res := &krpc.Response{}
+	res := &pb.Response{}
 	e = proto.Unmarshal(p, res)
 	if e != nil {
 		return
@@ -70,18 +70,18 @@ func (vsl *Vessel) GetVesselControl() (r []byte, e error) {
 	return
 }
 
-//GetSAS returns the current state of the given control unit SAS, true in case it is activated
+// GetSAS returns the current state of the given control unit SAS, true in case it is activated
 func (vsl *Vessel) GetSAS() (r bool, e error) {
 	arg := [][]byte{vsl.control}
 	pr := createRequest("SpaceCenter", "Control_get_SAS", createArguments(arg))
 	p, e := vsl.sc.conn.sendMessage(pr)
-	res := &krpc.Response{}
+	res := &pb.Response{}
 	proto.Unmarshal(p, res)
 	r = util.ByteToBool(res.GetResults()[0].GetValue())
 	return
 }
 
-//SetSAS sets the state of the given control unit's SAS, true to activate
+// SetSAS sets the state of the given control unit's SAS, true to activate
 func (vsl *Vessel) SetSAS(state bool) (e error) {
 	s := util.BoolToByte(state)
 	arg := [][]byte{vsl.vessel, s}
@@ -91,7 +91,7 @@ func (vsl *Vessel) SetSAS(state bool) (e error) {
 	return
 }
 
-//GetThrottle returns the Throtlle of the given control unit as float value between 0 and 1
+// GetThrottle returns the Throtlle of the given control unit as float value between 0 and 1
 func (vsl *Vessel) GetThrottle() (val float32, e error) {
 	arg := [][]byte{vsl.control}
 	pr := createRequest("SpaceCenter", "Control_get_Throttle", createArguments(arg))
@@ -99,13 +99,13 @@ func (vsl *Vessel) GetThrottle() (val float32, e error) {
 	if e != nil {
 		return
 	}
-	res := &krpc.Response{}
+	res := &pb.Response{}
 	proto.Unmarshal(p, res)
 	val = util.ByteToFloat32(res.GetResults()[0].GetValue())
 	return
 }
 
-//SetThrottle sets the Throtlle of the given control unit as float value between 0 and 1
+// SetThrottle sets the Throtlle of the given control unit as float value between 0 and 1
 func (vsl *Vessel) SetThrottle(val float32) (e error) {
 	arg := [][]byte{vsl.control, util.Float32toByte(val)}
 	pr := createRequest("SpaceCenter", "Control_set_Throttle", createArguments(arg))

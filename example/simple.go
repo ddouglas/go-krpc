@@ -4,15 +4,15 @@ import (
 	"os"
 	"time"
 
-	"github.com/jwuensche/sturdyengine"
+	"github.com/ddouglas/go-krpc"
 )
 
 func main() {
-	conn, err := sturdyengine.NewDefaultConnection()
+	conn, err := krpc.NewDefaultConnection()
 	if err != nil {
 		os.Exit(1)
 	}
-	sc, err := sturdyengine.NewSpaceCenter(&conn)
+	sc, err := krpc.NewSpaceCenter(&conn)
 	if err != nil {
 		os.Exit(1)
 	}
@@ -25,8 +25,8 @@ func main() {
 	sc.Quicksave()
 
 	vessel.SetThrottle(0.75)
-	vessel.ActivateNextStage()
+	// vessel.ActivateNextStage()
 	time.Sleep(10 * time.Second)
-	sc.Quickload()
+	// sc.Quickload()
 
 }

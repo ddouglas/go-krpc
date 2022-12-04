@@ -1,13 +1,13 @@
-package sturdyengine
+package krpc
 
 import (
 	"errors"
 	"flag"
 	"net/url"
 
-	"github.com/golang/protobuf/proto"
+	"github.com/ddouglas/go-krpc/internal/pb"
 	"github.com/gorilla/websocket"
-	krpc "github.com/jwuensche/sturdyengine/internal/krpcproto"
+	"google.golang.org/protobuf/proto"
 )
 
 // Connection contains all inforamtion required by websocket to establish connection
@@ -60,7 +60,7 @@ func (conn *Connection) Close() (e error) {
 	return
 }
 
-func (conn *Connection) sendMessage(r *krpc.Request) (p []byte, e error) {
+func (conn *Connection) sendMessage(r *pb.Request) (p []byte, e error) {
 	req, e := proto.Marshal(r)
 	if e != nil {
 		return
@@ -81,21 +81,21 @@ func (conn *Connection) sendMessage(r *krpc.Request) (p []byte, e error) {
 
 // REQUEST AND ARGMUENT CREATION
 
-func createRequest(service string, procedure string, arguments []*krpc.Argument) (pr *krpc.Request) {
-	pc := &krpc.ProcedureCall{
+func createRequest(service string, procedure string, arguments []*pb.Argument) (pr *pb.Request) {
+	pc := &pb.ProcedureCall{
 		Service:   service,
 		Procedure: procedure,
 		Arguments: arguments,
 	}
-	pr = &krpc.Request{
-		Calls: []*krpc.ProcedureCall{pc},
+	pr = &pb.Request{
+		Calls: []*pb.ProcedureCall{pc},
 	}
 	return
 }
 
-func createArguments(args [][]byte) (arg []*krpc.Argument) {
+func createArguments(args [][]byte) (arg []*pb.Argument) {
 	for pos, val := range args {
-		arg = append(arg, &krpc.Argument{
+		arg = append(arg, &pb.Argument{
 			Position: uint32(pos),
 			Value:    val,
 		})
