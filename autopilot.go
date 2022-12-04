@@ -1,6 +1,6 @@
-package sturdyengine
+package krpc
 
-//AutoPilot represents an instance of krpc autopilot for a vessel
+// AutoPilot represents an instance of krpc autopilot for a vessel
 type AutoPilot struct {
 	sc  *SpaceCenter
 	vsl *Vessel
